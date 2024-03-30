@@ -3,6 +3,7 @@
 - [X] Move crud operations for orders into orderbook
 - [X] Split routes into relays/controllers and routes
 - [ ] Add socketio functionality
+- [ ] Set async support for sqlite
 - [ ] Provide auth for endpoints
 - [ ] Add alembic for maintaining migrations
 - [ ] Add logging functionality
@@ -10,6 +11,7 @@
 - [ ] Possibly separate out trades into a separate microservice
 - [ ] Create provision for a Dead Letter Queue for failed trades
 - [ ] Add unit tests especially for orderbook
+- [ ] Replace models on api side with pydantic schemas (and move creation to crud)
 
 
 ## Improved Design

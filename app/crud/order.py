@@ -10,21 +10,22 @@ from app.core.db import SessionLocal
 class OrderCRUD():
     def __init__(self, session_maker, orderbook: OrderBook):
         self.orderbook = orderbook
-        self.siesmic = session_maker
+        # async session maker
+        self.seismic = session_maker
 
     async def create(self, new_order: Order) -> Order:
-        with self.siesmic() as session:
+        async with self.seismic() as session:
             old_order = session.query(Order).get(new_order.order_id)
             if old_order:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
                     detail="Order already exists"
                 )
-            return await self.create_or_update(new_order)
+        return await self.create_or_update(new_order)
 
 
     async def create_or_update(self, new_order: Order) -> Order:
-        with self.siesmic() as session:
+        async with self.seismic() as session:
             session.add(new_order)
             try: 
                 await session.commit()
@@ -35,7 +36,6 @@ class OrderCRUD():
                     await self.orderbook.place_bid_order(new_order)
             except Exception as error:
                 raise Exception("Failed to place order.", error)
-
         return new_order
 
     async def update(self, new_order: Order) -> Order:
@@ -56,14 +56,14 @@ class OrderCRUD():
     
 
     async def preview_orderbook(self) -> Dict[str, List[Order]]:
-        order_id_list = await self.orderbook.preview_orderbook()
-        with self.siesmic() as session:
+        order_id_list = self.orderbook.preview_orderbook()
+        async with self.seismic() as session:
             ask_orders = sorted( 
-                [ await session.query(Order).get(order_id) for order_id in order_id_list['asks'] ],
+                [ session.query(Order).get(order_id) for order_id in order_id_list['asks'] ],
                 key=lambda order: order.order_price
             )
             bid_orders = sorted( 
-                [ await session.query(Order).get(order_id) for order_id in order_id_list['bids'] ],
+                [ session.query(Order).get(order_id) for order_id in order_id_list['bids'] ],
                 key=lambda order: order.order_price,
                 reverse=True
             )
@@ -78,9 +78,9 @@ class OrderCRUD():
         if ask_order_id is None or bid_order_id is None:
             return False
 
-        with self.siesmic() as session:
-            ask_order = await session.query(Order).get(ask_order_id)
-            bid_order = await session.query(Order).get(bid_order_id)
+        async with self.seismic() as session:
+            ask_order = session.query(Order).get(ask_order_id)
+            bid_order = session.query(Order).get(bid_order_id)
             
         taking_quantity = min(
             ask_order.order_quantity - ask_order.traded_quantity, 
