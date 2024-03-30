@@ -1,13 +1,13 @@
-import secrets
-from typing import Dict, List
-
+from typing import List
 from fastapi import status
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "OrdersAPI"
-    DATABASE_URL = "sqlite:///./test.db"
+    DATABASE_URL: str = "sqlite:///./test.db"
+    HOST_URL: str = "localhost"
+    HOST_PORT: int = 6565
 
     SUCCESS_STATUS_CODES: List[int] = [
         status.HTTP_200_OK,
@@ -25,5 +25,6 @@ class Settings(BaseSettings):
         status.HTTP_409_CONFLICT,
         status.HTTP_429_TOO_MANY_REQUESTS,
     ]
+
 
 settings = Settings()

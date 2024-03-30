@@ -25,3 +25,4 @@ keyconfig.py
 venv/
 *.csv
 *.db
+*.env

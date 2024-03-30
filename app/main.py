@@ -4,15 +4,13 @@ from starlette.middleware.cors import CORSMiddleware
 
 
 # TODO: figure how to secure apis in the future
+# TODO: setup JWT auth for APIs
 # import secure
 
-from app.core import settings, api_router
+from api import api_router
+from core.config import settings
 
 app = FastAPI(title=settings.PROJECT_NAME)
-
-#TODO: Setup socketio manager
-
-
 
 app.add_middleware(
     CORSMiddleware,
