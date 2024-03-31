@@ -20,7 +20,6 @@ python-socketio = {extras = ["client"], version = "^5.11.2"}
 requests = "^2.31.0"
 websocket-client = "^1.7.0"
 websockets = "^12.0"
-aiohttp = "^3.9.3"
 httpx = "^0.27.0"
 
 

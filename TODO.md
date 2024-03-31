@@ -12,6 +12,7 @@
 - [ ] Test out socketio functionality with socketio
 - [ ] Update /order/{order_id} on a quantity less than traded_quantity. This truncates to traded_quantity and marks order_alive=False, however it returns { "success": True }.
 
+
 ## Later
 - [ ] Provide auth for endpoints
 - [ ] Add alembic for maintaining migrations
@@ -22,7 +23,8 @@
 - [ ] Add unit tests especially for orderbook
 - [ ] Replace models on api side with pydantic schemas (and move creation to crud)
 
-- [ ] Replace sorted sets 'ID' with an 'UpdatedAt' approach. Since this system could be gamed!
+- [ ] Replace sorted sets 'ID' with an 'UpdatedAt' approach. Since this system could be
+    gamed!
 
 
 
