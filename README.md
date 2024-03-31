@@ -1,20 +1,14 @@
-## Installation and Usage
+## Quickstart
 
-Commands to run directy,
-- Run redis on port 6379
-```
-docker pull redis
-docker run --detach -p 6379:6379 redis
-```
-- Setup FastAPI application (in virtualenv or using poetry)
-```bash
-pip install --no-cache-dir --upgrade -r /app/requirements.txt
-uvicorn app.main:app --reload
-```
+- Install docker-compose
+- Run `docker compose up -d`.
+- Visit `http://localhost:8080/docs` for the swagger UI for the API endpoints
 
 ## Design
 
 ### Current Design
+![Current Implementation drawio](https://github.com/cheese-cracker/magic_pricemaker/assets/30256734/ca327997-79a8-49f8-92b8-bb2049e0b1f0)
+
 
 
 Pros:
@@ -44,7 +38,7 @@ Cons:
         - Taking away max-ask and min-bid orders could take away opportunity from other order-pairs
             from being formed. 
         - Doesn't provide first preference to oldest order
-2. Order fullfillment is attempted at placement:
+2. Order fulfilment is attempted at placement:
     - Approach: 
         - Match (max ask order,  current order) or vice versa
     - Pros:
@@ -78,7 +72,8 @@ Cons:
 
 One approach is we can combine 2, 3 and 4 to form a fairly optimal order book.
 Where,
-2. Order fullfillment can be attempted as-soon-as they arrive. Thus, atleast partially processing
+
+2. Order fulfilment can be attempted as-soon-as they arrive. Thus, atleast partially processing
    orders in-sequence of their arrival.
 3. Closest orders can be matched thus provide room for more orders to be matched more easily.
 4. Earlier orders are provided a preference. (due to the priority scheduler)
@@ -87,22 +82,39 @@ However, the implementation of this design with scale is still a major concern.
 The current approach is a simple version of 1.
 
 Possible Solution with regards to this implementation:
-- Using redis.zrange withscores, we could select a finite no. of orders within a range of prices below it 
+- Using `redis.zrange` withscores, we could select a finite no. of orders within a range of prices below i.t 
 - Suppose by selecting 100 orders in range (0, current_bid_price), we can match the current bid
-    order to the oldest ask order in this range.
-- This method provides a fairly optimal approach combining some of the aspects of the 2, 3, 4 methods.
-
+    order to the oldest ask order in this range
+- This method provides a fairly optimal approach combining some of the aspects of the 2, 3, 4 methods
 
 
 ## Troubleshooting
 
-In the rare case sqlite 'testdb' and 'redis' get out of sync, delete the 'testdb',
+In the rare case sqlite 'testdb' and 'redis' get out of sync, it may throw errors.
+If you use docker simply run `docker compose down` and then `docker compose up -d` to rerun the application afresh.
+
+
+In case you run without docker compose,
+Delete the 'testdb' (DATABASE_URL)
 And run,
 ```python
 from redis import Redis
 from redis import Redis
 r = Redis(host='localhost', port=6379)
-# Delete ask and bid sets to prevent stale order_ids
+# Delete ask and bid sets (REDIS_ASK_SET and REDIS_BID_SET) to prevent stale order_ids
 r.delete("asks")
 r.delete("bids")
+```
+
+#### Alternate Method of Running Application
+
+- Run redis on port 6379
+```
+docker pull redis
+docker run --detach -p 6379:6379 redis
+```
+- Setup FastAPI application (in virtualenv or using poetry)
+```bash
+pip install --no-cache-dir --upgrade -r /app/requirements.txt
+uvicorn app.main:app --reload
 ```
