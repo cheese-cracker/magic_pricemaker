@@ -1,4 +1,5 @@
 from typing import List, Dict
+from sqlalchemy import select
 from app.core.db import SessionLocal
 from app.models.trade import Trade
 
@@ -17,11 +18,11 @@ class TradeCRUD():
 
     async def read(self, trade_id: int) -> Trade:
         async with self.seismic() as session:
-            return await session.execute(select(Trade).filter(Trade.trade_id == trade_id)).scalar()
+            return ( await session.execute(select(Trade).filter(Trade.trade_id == trade_id)) ).scalar()
 
     async def read_all(self) -> List[Trade]:
         async with self.seismic() as session:
-            return await session.execute(select(Trade)).scalars().all()
+            return ( await session.execute(select(Trade)) ).scalars().all()
 
 
 trade_crud = TradeCRUD(SessionLocal)

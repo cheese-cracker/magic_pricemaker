@@ -8,7 +8,7 @@ from datetime import datetime
 class Trade(Base):
     __tablename__ = "trades"
 
-    trade_id: Mapped[int] = mapped_column(primary_key=True, index=True)
+    trade_id: Mapped[int] = mapped_column(nullable=False, unique=True, primary_key=True, index=True, autoincrement=True)
     executed_time: Mapped[datetime] = mapped_column(default=datetime.utcnow)
     price: Mapped[float] = mapped_column(Numeric(precision=10, scale=2), index=True)
     quantity: Mapped[int]

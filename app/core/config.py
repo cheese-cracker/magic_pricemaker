@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite+aiosqlite:///./test.db"
     # Redis Config
     REDIS_HOST: str = "localhost"
-    REDIS_PORT: int = 6565
+    REDIS_PORT: int = 6379
     REDIS_ASK_SET: str = "asks"
     REDIS_BID_SET: str = "bids"
 

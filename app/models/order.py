@@ -8,10 +8,10 @@ class Order(Base):
     __tablename__ = "orders"
 
     order_id: Mapped[int] = mapped_column(nullable=False, unique=True, primary_key=True, index=True, autoincrement=True)
-    side: Mapped[int]
     order_price: Mapped[float] = mapped_column(Numeric(precision=10, scale=2))
-    order_quantity: Mapped[int]
-    order_alive: Mapped[bool]
+    order_quantity: Mapped[int] = mapped_column(nullable=False)
+    side: Mapped[int] = mapped_column(nullable=False)
+    order_alive: Mapped[bool] = mapped_column(nullable=False)
     total_traded_price: Mapped[float] = mapped_column(Numeric(precision=10, scale=2), default=0)
     traded_quantity: Mapped[int] = mapped_column(default=0)
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)

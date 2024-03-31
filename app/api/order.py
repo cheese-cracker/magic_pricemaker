@@ -10,11 +10,33 @@ from app.models.order import Order
 
 router = APIRouter()
 
+@router.get("/trade")
+async def process_one_trade() -> Any:
+    result = await order_crud.attempt_trade()
+    print(result)
+    return { "success": True }
+
+
 @router.get("/orderbook")
 async def glance_orderbook() -> Any:
     orderbook_orders = await order_crud.preview_orderbook()
-    print(orderbook_orders)
-    return { "success": True }
+    print("orderbook_orders", orderbook_orders)
+    return {
+            "bids": [
+                {
+                    "order_id": order.order_id,
+                    "price": order.order_price,
+                    "quantity": order.order_quantity,
+                } for order in orderbook_orders["bids"]
+            ],
+            "asks": [
+                {
+                    "order_id": order.order_id,
+                    "price": order.order_price,
+                    "quantity": order.order_quantity
+                } for order in orderbook_orders["asks"]
+            ]
+        }
 
 
 @router.get("/{order_id}", response_model=OrderFetchResponse)
@@ -29,6 +51,7 @@ async def fetch(order_fetch: OrderFetchRequest):
 @router.post("", response_model=OrderCreateResponse)
 async def create(*, order_create: OrderCreateRequest):
     try: 
+        print(order_create)
         new_order: Order = await order_crud.create(order_create.dict())
     except Exception as error:
         print(error)
@@ -37,7 +60,7 @@ async def create(*, order_create: OrderCreateRequest):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
     return JSONResponse(
-        content={"order_id": new_order.id},
+        content={"order_id": new_order.order_id},
         status_code=status.HTTP_201_CREATED
     )
 
@@ -61,7 +84,7 @@ async def delete(*, order_id: int):
 
 
 @router.get("", response_model=OrderFetchAllResponse)
-async def fetch_al():
+async def fetch_all():
     order_list = await order_crud.fetch_all()
     return JSONResponse(
         content={ "orders" : [jsonable_encoder(order) for order in order_list] },
@@ -69,34 +92,34 @@ async def fetch_al():
     )
 
 
-@router.on_event("startup")
-@repeat_every(seconds=0.1)
-async def attempt_trade():
-    await order_crud.attempt_trade()
+# @router.on_event("startup")
+# @repeat_every(seconds=0.1)
+# async def attempt_trade():
+#     await order_crud.attempt_trade()
 
 
 
-@router.on_event("startup")
-@repeat_every(seconds=1)
-async def preview_orderbook():
-    orderbook_orders = await order_crud.preview_orderbook()
-    # NOTE: Only provides the last 5 bids and asks orders NOT prices
-    await sio.emit(
-        "orderbook",
-        {
-            "bids": [
-                {
-                    "order_id": order.order_id,
-                    "price": order.price,
-                    "quantity": order.quantity
-                } for order in orderbook_orders["bids"]
-            ],
-            "asks": [
-                {
-                    "order_id": order.order_id,
-                    "price": order.price,
-                    "quantity": order.quantity
-                } for order in orderbook_orders["asks"]
-            ]
-        }
-    )
+# @router.on_event("startup")
+# @repeat_every(seconds=1)
+# async def preview_orderbook():
+#     orderbook_orders = await order_crud.preview_orderbook()
+#     # NOTE: Only provides the last 5 bids and asks orders NOT prices
+#     await sio.emit(
+#         "orderbook",
+#         {
+#             "bids": [
+#                 {
+#                     "order_id": order.order_id,
+#                     "price": order.order_price,
+#                     "quantity": order.order_quantity
+#                 } for order in orderbook_orders["bids"]
+#             ],
+#             "asks": [
+#                 {
+#                     "order_id": order.order_id,
+#                     "price": order.order_price,
+#                     "quantity": order.order_quantity
+#                 } for order in orderbook_orders["asks"]
+#             ]
+#         }
+#     )

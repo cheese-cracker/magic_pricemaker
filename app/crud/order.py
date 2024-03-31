@@ -32,20 +32,20 @@ class OrderCRUD():
     async def create_or_update(self, new_order: Order) -> Order:
         async with self.seismic() as session:
             session.add(new_order)
-            try: 
-                await session.commit()
-                await session.refresh(new_order)
-                if new_order.side == -1 and new_order.order_alive:
-                    await self.orderbook.insert_ask_order(new_order)
-                elif new_order.side == 1 and new_order.order_alive:
-                    await self.orderbook.insert_bid_order(new_order)
-            except Exception as error:
-                raise Exception("Failed to place order.", error)
+            # try: 
+            await session.commit()
+            await session.refresh(new_order)
+            if new_order.side == -1 and new_order.order_alive:
+                await self.orderbook.insert_ask_order(new_order)
+            elif new_order.side == 1 and new_order.order_alive:
+                await self.orderbook.insert_bid_order(new_order)
+            # except Exception as error:
+            #     raise Exception("Failed to place order.", error)
         return new_order
 
     async def update(self, order_update: Dict) -> Order:
-        with self.seismic() as session:
-            exist_order = await session.execute(select(Order).filter(Order.order_id == order_update["order_id"])).scalar()
+        async with self.seismic() as session:
+            exist_order =  ( await session.execute(select(Order).filter(Order.order_id == order_update["order_id"])) ).scalar()
             if not exist_order:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
@@ -64,11 +64,11 @@ class OrderCRUD():
             exist_order.order_alive = False
 
         # Check Price and Quantity modifications
-        if exist_order.quantity <= exist_order.traded_quantity:
-            exist_order.quantity = exist_order.traded_quantity
+        if exist_order.order_quantity <= exist_order.traded_quantity:
+            exist_order.order_quantity = exist_order.traded_quantity
             exist_order.order_alive = False
 
-        return await self.create(new_order)
+        return await self.create_or_update(exist_order)
 
 
     async def delete(self, order_id: int):
@@ -87,15 +87,28 @@ class OrderCRUD():
     async def preview_orderbook(self) -> Dict[str, List[Order]]:
         order_id_list = await self.orderbook.preview_orderbook()
         async with self.seismic() as session:
-            ask_orders = sorted(
-                [await session.execute(select(Order).filter(Order.order_id == order_id)).scalar() for order_id in order_id_list['asks']],
-                key=lambda order: order.order_price
-            )
-            bid_orders = sorted(
-                [await session.execute(select(Order).filter(Order.order_id == order_id)).scalar() for order_id in order_id_list['bids']],
-                key=lambda order: order.order_price,
-                reverse=True
-            )
+            try: 
+                ask_orders = sorted(
+                    [ 
+                        ( await session.execute(select(Order).filter(Order.order_id == order_id)) ).scalar() 
+                        for order_id in order_id_list['asks']
+                    ],
+                    key=lambda order: order.order_price
+                )
+                bid_orders = sorted(
+                    [
+                        ( await session.execute(select(Order).filter(Order.order_id == order_id)) ).scalar()
+                        for order_id in order_id_list['bids']
+                    ],
+                    key=lambda order: order.order_price,
+                    reverse=True
+                )
+            except AttributeError:
+                # TODO: Setup a clean up that removes order ids that have been deleted from db.
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Orderbook out of Sync! Stop server and remove all None IDs from orderbook."
+                )
         return {
             "bids": bid_orders,
             "asks": ask_orders
@@ -108,8 +121,8 @@ class OrderCRUD():
             return False
 
         async with self.seismic() as session:
-            ask_order = await session.execute(select(Order).filter(Order.order_id == ask_order_id)).scalar()
-            bid_order = await session.execute(select(Order).filter(Order.order_id == bid_order_id)).scalar()
+            ask_order = ( await session.execute(select(Order).filter(Order.order_id == ask_order_id)) ).scalar()
+            bid_order = ( await session.execute(select(Order).filter(Order.order_id == bid_order_id)) ).scalar()
            
         taking_quantity = min(
             ask_order.order_quantity - ask_order.traded_quantity, 
@@ -123,14 +136,14 @@ class OrderCRUD():
             trading_price = bid_order.order_price
 
         # Trade will mark alive = False if traded_quantity is full
-        ask_order.trade(trading_price, taking_quantity)
-        bid_order.trade(trading_price, taking_quantity)
+        await ask_order.trade(trading_price, taking_quantity)
+        await bid_order.trade(trading_price, taking_quantity)
 
         try:
             await self.create_or_update(ask_order)
             await self.create_or_update(bid_order)
             # TODO: Request on Trade API to register trade instead?
-            api_trade_create(
+            return await api_trade_create(
                 trade_create=TradeCreateRequest(
                     price=trading_price,
                     quantity=taking_quantity,
@@ -141,7 +154,6 @@ class OrderCRUD():
         except Exception as error:
             # TODO: DLQ for this case
             raise Exception("Failed to commit trade. Orderbook may be out of sync!", error)
-        return True
     
 
 order_crud = OrderCRUD(session_maker=SessionLocal, orderbook=orderbook)

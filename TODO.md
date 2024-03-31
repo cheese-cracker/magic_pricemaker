@@ -13,6 +13,12 @@
 - [ ] Add unit tests especially for orderbook
 - [ ] Replace models on api side with pydantic schemas (and move creation to crud)
 
+- [ ] Replace sorted sets 'ID' with an 'UpdatedAt' approach. Since this system could be gamed!
+
+- Sort Out:
+- [ ] Socketio support - How??
+- [ ] Dockerfile and docker-compose.yaml ??
+
 
 ## Improved Design
 
