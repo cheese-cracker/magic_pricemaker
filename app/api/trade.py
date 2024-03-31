@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status, Query
+from fastapi import APIRouter, HTTPException, status, Query, Path
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from typing import Any
@@ -10,19 +10,12 @@ from app.core.socketio import sio
 
 router = APIRouter()
 @router.get("/{trade_id}")
-async def fetch(trade_id: int) -> Any:
-    print(trade_id)
-    return {"success": True}
-
-
-
-
-# , response_model=TradeFetchAllResponse
-    # trade = await trade_crud.read(trade_id)
-    # return JSONResponse(
-    #     content=jsonable_encoder(trade),
-    #     status_code=status.HTTP_200_OK
-    # )
+async def fetch(trade_id: int = Path(...), response_model=TradeFetchAllResponse) -> Any:
+    trade = await trade_crud.read(trade_id)
+    return JSONResponse(
+        content=jsonable_encoder(trade),
+        status_code=status.HTTP_200_OK
+    )
 
 
 @router.post("", response_model=TradeCreateResponse)
@@ -37,17 +30,17 @@ async def create(*, trade_create: TradeCreateRequest):
             detail="Trade creation failed! Orderbook may be out of sync!",
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-    # await sio.emit(
-    #     "trade",
-    #     {
-    #         "trade_id": new_trade.id,
-    #         "price": new_trade.price,
-    #         "quantity": new_trade.quantity,
-    #         "executed_time": new_trade.executed_time,
-    #         "bid_order_id": new_trade.bid_order_id,
-    #         "ask_order_id": new_trade.ask_order_id
-    #     }
-    # )
+    await sio.emit(
+        "trade",
+        {
+            "trade_id": new_trade.trade_id,
+            "price": new_trade.price,
+            "quantity": new_trade.quantity,
+            "executed_time": new_trade.executed_time,
+            "bid_order_id": new_trade.bid_order_id,
+            "ask_order_id": new_trade.ask_order_id
+        }
+    )
     return JSONResponse(
         content={"trade_id": new_trade.trade_id},
         status_code=status.HTTP_201_CREATED

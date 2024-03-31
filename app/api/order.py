@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Path
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from fastapi_utilities import repeat_every
@@ -10,17 +10,9 @@ from app.models.order import Order
 
 router = APIRouter()
 
-@router.get("/trade")
-async def process_one_trade() -> Any:
-    result = await order_crud.attempt_trade()
-    print(result)
-    return { "success": True }
-
-
 @router.get("/orderbook")
 async def glance_orderbook() -> Any:
     orderbook_orders = await order_crud.preview_orderbook()
-    print("orderbook_orders", orderbook_orders)
     return {
             "bids": [
                 {
@@ -40,8 +32,8 @@ async def glance_orderbook() -> Any:
 
 
 @router.get("/{order_id}", response_model=OrderFetchResponse)
-async def fetch(order_fetch: OrderFetchRequest):
-    order = await order_crud.fetch(order_fetch.order_id)
+async def fetch(order_id: int = Path(...)):
+    order = await order_crud.fetch(order_id)
     return JSONResponse(
         content=jsonable_encoder(order),
         status_code=status.HTTP_200_OK
@@ -66,8 +58,12 @@ async def create(*, order_create: OrderCreateRequest):
 
 
 @router.put("/{order_id}", response_model=OrderUpdateResponse)
-async def update(*, order_update: OrderUpdateRequest):
-    updated_order = await order_crud.update(order_update.dict(exclude_unset=True))
+async def update(*, order_id : int = Path(...), order_update: OrderUpdateRequest):
+
+    order_update_dict = order_update.dict(exclude_unset=True)
+    order_update_dict['order_id'] = order_id
+
+    updated_order = await order_crud.update(order_update_dict)
     return JSONResponse(
         content={"success": True},
         status_code=status.HTTP_200_OK
@@ -75,7 +71,7 @@ async def update(*, order_update: OrderUpdateRequest):
 
 
 @router.delete("/{order_id}", response_model=OrderDeleteResponse)
-async def delete(*, order_id: int):
+async def delete(*, order_id: int = Path(...)):
     await order_crud.delete(order_id)
     return JSONResponse(
         content={"success": True},
@@ -92,10 +88,18 @@ async def fetch_all():
     )
 
 
-# @router.on_event("startup")
-# @repeat_every(seconds=0.1)
-# async def attempt_trade():
-#     await order_crud.attempt_trade()
+@router.get("/trade")
+async def process_one_trade() -> Any:
+    result = await order_crud.attempt_trade()
+    print(result)
+    return { "success": True }
+
+
+
+@router.on_event("startup")
+@repeat_every(seconds=10)
+async def attempt_trade():
+    await order_crud.attempt_trade()
 
 
 

@@ -18,6 +18,7 @@
 - Sort Out:
 - [ ] Socketio support - How??
 - [ ] Dockerfile and docker-compose.yaml ??
+- [ ] I also need to sort how the F I am gonna get them to match sequentially!
 
 
 ## Improved Design
