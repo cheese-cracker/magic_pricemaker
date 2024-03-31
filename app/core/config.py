@@ -1,3 +1,4 @@
+import os
 from typing import List
 from fastapi import status
 from pydantic_settings import BaseSettings
@@ -5,10 +6,10 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "OrdersAPI"
-    DATABASE_URL: str = "sqlite+aiosqlite:///./test.db"
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./test.db")
     # Redis Config
-    REDIS_HOST: str = "localhost"
-    REDIS_PORT: int = 6379
+    REDIS_HOST: str = os.getenv("REDIS_HOST", "localhost")
+    REDIS_PORT: int = int(os.getenv("REDIS_PORT", 6379))
     REDIS_ASK_SET: str = "asks"
     REDIS_BID_SET: str = "bids"
 

@@ -5,4 +5,4 @@ COPY ./requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
 
 # Not Expected to be used with Kubernetes
-COPY ./app /app
+COPY ./app /app/app

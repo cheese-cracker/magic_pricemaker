@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  pricemaker:
+    container_name: pricemaker
+    build: .
+    ports:
+      - "8080:80"
+    networks:
+      - fastapi_network
+    environment:
+      - REDIS_HOST=redis  
+      - REDIS_PORT=6379   
+      - WORKER_CLASS=app.core.custom_worker.CustomUvicornWorker
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:latest
+    container_name: orderbook
+    ports:
+      - "6379:6379"  # Expose Redis service on port 6379
+    networks:
+      - fastapi_network
+
+networks:
+  fastapi_network:  # Define a custom network for the services
+    driver: bridge
