@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, conlist
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 class TradeCreateRequest(BaseModel):
@@ -20,4 +20,4 @@ class TradeFetchResponse(BaseModel):
     ask_order_id: int
     
 class TradeFetchAllResponse(BaseModel):
-    trades: conlist(TradeFetchResponse)
+    trades: List[TradeFetchResponse]

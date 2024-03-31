@@ -23,3 +23,12 @@ repos:
     rev: v1.9.0
     hooks:
       - id: mypy
+        args: ["--disable-error-code=import-untyped"]
+        additional_dependencies:
+          [
+            types-requests,
+            types-redis,
+            pydantic,
+            sqlalchemy,
+            fastapi
+          ]

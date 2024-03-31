@@ -13,6 +13,10 @@ aiosqlite = "^0.20.0"
 sqlalchemy = {extras = ["asyncio"], version = "^2.0.29"}
 fastapi-utilities = "^0.2.0"
 python-dotenv = "^1.0.1"
+pydantic-settings = "^2.2.1"
+redis = "^5.0.3"
+nest-asyncio = "^1.6.0"
+python-socketio = "^5.11.2"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -1,9 +1,10 @@
-from main import app
-from fastapi_socketio import SocketManager
+from socketio import AsyncServer, ASGIApp
+# from app.main import app
 
-socketio_manager = SocketManager(app)
+sio = AsyncServer(cors_allowed_origins='*',async_mode='asgi')
 
-# socketio_manager = SocketManager(app, socketio_path="/socket.io")
+#wrap with ASGI application
+socket_app = ASGIApp(sio)
 
 # connect to the redis queue as an external process
 # external_sio = socketio.RedisManager('redis://', write_only=True)

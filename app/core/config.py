@@ -6,8 +6,11 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     PROJECT_NAME: str = "OrdersAPI"
     DATABASE_URL: str = "sqlite+aiosqlite:///./test.db"
-    HOST_URL: str = "localhost"
-    HOST_PORT: int = 6565
+    # Redis Config
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6565
+    REDIS_ASK_SET: str = "asks"
+    REDIS_BID_SET: str = "bids"
 
     SUCCESS_STATUS_CODES: List[int] = [
         status.HTTP_200_OK,

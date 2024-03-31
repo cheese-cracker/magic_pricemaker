@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from app.crud.trade import trade_crud
 from app.schemas.trade import TradeCreateRequest, TradeCreateResponse, TradeFetchAllResponse
 from app.models.trade import Trade
-from app.main import socketio_manager
+from app.core.socketio import sio
 
 
 router = APIRouter()
@@ -20,16 +20,15 @@ async def fetch(*, trade_id: int):
 
 @router.post("", response_model=TradeCreateResponse)
 async def create(*, trade_create: TradeCreateRequest):
-    new_trade: Trade = Trade(**trade_create.dict())
     try: 
-        new_trade: Trade = await trade_crud.create(trade)
+        new_trade: Trade = await trade_crud.create(trade_create.dict())
     except:
         # TODO: Place in DLQ in redis itself?
         raise HTTPException(
             detail="Trade creation failed! Orderbook may be out of sync!",
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-    await socketio_manager.emit(
+    await sio.emit(
         "trade",
         {
             "trade_id": new_trade.id,

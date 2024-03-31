@@ -1,5 +1,5 @@
-from pydantic import BaseModel, Field, conlist
-from typing import Optional
+from pydantic import BaseModel, Field
+from typing import Optional, List
 from datetime import datetime
 
 class OrderCreateRequest(BaseModel):
@@ -12,9 +12,9 @@ class OrderCreateResponse(BaseModel):
 
 
 class OrderUpdateRequest(BaseModel):
-    order_price: float = Field(ge=0.0, multiple_of=0.01)
-    order_quantity: int = Field(ge=0)
-    side: int = Field(int, ge=-1, le=1, multiple_of=1)
+    order_id: int
+    order_price: Optional[float] = Field(ge=0.0, multiple_of=0.01)
+    order_quantity: Optional[int] = Field(ge=0)
 
 class OrderUpdateResponse(BaseModel):
     success: bool
@@ -40,4 +40,4 @@ class OrderFetchResponse(BaseModel):
     traded_quantity: int
     
 class OrderFetchAllResponse(BaseModel):
-    orders: conlist(OrderFetchResponse)
+    orders: List[OrderFetchResponse]

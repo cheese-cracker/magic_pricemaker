@@ -1,5 +1,5 @@
-from core.config import settings
-from aioredis import Redis
+from app.core.config import settings
+from redis import Redis
 
 redis_db = Redis(
     host=settings.REDIS_HOST,
