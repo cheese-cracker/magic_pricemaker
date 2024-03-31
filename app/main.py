@@ -2,6 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 import nest_asyncio
+from fastapi.testclient import TestClient
 
 
 # TODO: figure how to secure apis in the future
@@ -22,10 +23,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from app.core.socketio import socket_app
+# from app.core.socketio import socket_app
 from app.api import api_router
 
-app.add_websocket_route("/", socket_app)
 app.include_router(api_router)
 
 if __name__ == "__main__":

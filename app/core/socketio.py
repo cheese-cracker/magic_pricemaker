@@ -1,7 +1,7 @@
 from socketio import AsyncServer, ASGIApp
 # from app.main import app
 
-sio = AsyncServer(cors_allowed_origins='*',async_mode='asgi')
+sio = AsyncServer(async_mode='asgi')
 
 #wrap with ASGI application
 socket_app = ASGIApp(sio)

@@ -4,7 +4,6 @@ from app.core.redis_db import redis_db
 
 router = APIRouter()
 
-
 @router.get("")
 async def get_health_status() -> Any:
     return {"success": True}
@@ -13,6 +12,6 @@ async def get_health_status() -> Any:
 async def redis_check():
     try:
         redis_db.ping()
-        return {"status": "ok"}
+        return {"success": True}
     except redis.ConnectionError:
         raise HTTPException(status_code=503, detail="Redis is not available")

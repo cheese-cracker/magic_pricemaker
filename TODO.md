@@ -2,8 +2,17 @@
 - [X] Add redis orderbook functionality
 - [X] Move crud operations for orders into orderbook
 - [X] Split routes into relays/controllers and routes
+- [X] Set async support for sqlite
+- [ ] Dockerfile and docker-compose.yaml
+- [ ] Use New approach to placing orders using redis.zrange with scores (choose 100 in range then select
+    oldest id)
+
+## Fixes
 - [ ] Add socketio functionality
-- [ ] Set async support for sqlite
+- [ ] Test out socketio functionality with socketio
+- [ ] Update /order/{order_id} on a quantity less than traded_quantity. This truncates to traded_quantity and marks order_alive=False, however it returns { "success": True }.
+
+## Later
 - [ ] Provide auth for endpoints
 - [ ] Add alembic for maintaining migrations
 - [ ] Add logging functionality
@@ -15,14 +24,9 @@
 
 - [ ] Replace sorted sets 'ID' with an 'UpdatedAt' approach. Since this system could be gamed!
 
-- Sort Out:
-- [ ] Socketio support - How??
-- [ ] Dockerfile and docker-compose.yaml ??
-- [ ] I also need to sort how the F I am gonna get them to match sequentially!
 
 
 ## Improved Design
-
 
 - Workers: 
     - celery and flower: Celery workers can be used to attempt to perform trades from a redis stream

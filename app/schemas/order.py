@@ -19,8 +19,8 @@ class OrderCreateResponse(BaseModel):
 
 
 class OrderUpdateRequest(BaseModel):
-    order_price: Optional[float] = Field(ge=0.0, multiple_of=0.01)
-    order_quantity: Optional[int] = Field(ge=0)
+    order_price: Optional[float] = Field(ge=0.0, multiple_of=0.01, default=None)
+    order_quantity: Optional[int] = Field(ge=0, default=None)
 
 class OrderUpdateResponse(BaseModel):
     success: bool

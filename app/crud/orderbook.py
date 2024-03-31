@@ -50,8 +50,6 @@ class OrderBook:
             else:
                 max_bid_pair = None
 
-            print(max_bid_pair, min_ask_pair)
-
             if not min_ask_pair or not max_bid_pair:
                 if min_ask_pair:
                     self.r.zadd(self.ask_set, dict([ min_ask_pair ]))

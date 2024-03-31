@@ -18,7 +18,7 @@ class OrderCRUD():
 
     async def fetch(self, order_id: int) -> Order:
         async with self.seismic() as session:
-            return session.execute(select(Order).filter(Order.order_id == order_id)).scalar()
+            return ( await session.execute(select(Order).filter(Order.order_id == order_id)) ).scalar()
 
     async def create(self, order_create: Dict) -> Order:
         new_order = Order(

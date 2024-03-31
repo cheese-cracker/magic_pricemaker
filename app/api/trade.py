@@ -3,14 +3,14 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from typing import Any
 from app.crud.trade import trade_crud
-from app.schemas.trade import TradeCreateRequest, TradeCreateResponse, TradeFetchAllResponse
+from app.schemas.trade import TradeCreateRequest, TradeCreateResponse, TradeFetchResponse, TradeFetchAllResponse
 from app.models.trade import Trade
 from app.core.socketio import sio
 
 
 router = APIRouter()
-@router.get("/{trade_id}")
-async def fetch(trade_id: int = Path(...), response_model=TradeFetchAllResponse) -> Any:
+@router.get("/{trade_id}", response_model=TradeFetchResponse)
+async def fetch(*, trade_id: int = Path(...)) -> Any:
     trade = await trade_crud.read(trade_id)
     return JSONResponse(
         content=jsonable_encoder(trade),

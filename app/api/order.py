@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status, Path
+from fastapi import APIRouter, HTTPException, status, Path, WebSocket
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from fastapi_utilities import repeat_every
@@ -97,33 +97,33 @@ async def process_one_trade() -> Any:
 
 
 @router.on_event("startup")
-@repeat_every(seconds=10)
+@repeat_every(seconds=0.5)
 async def attempt_trade():
     await order_crud.attempt_trade()
 
 
 
-# @router.on_event("startup")
-# @repeat_every(seconds=1)
-# async def preview_orderbook():
-#     orderbook_orders = await order_crud.preview_orderbook()
-#     # NOTE: Only provides the last 5 bids and asks orders NOT prices
-#     await sio.emit(
-#         "orderbook",
-#         {
-#             "bids": [
-#                 {
-#                     "order_id": order.order_id,
-#                     "price": order.order_price,
-#                     "quantity": order.order_quantity
-#                 } for order in orderbook_orders["bids"]
-#             ],
-#             "asks": [
-#                 {
-#                     "order_id": order.order_id,
-#                     "price": order.order_price,
-#                     "quantity": order.order_quantity
-#                 } for order in orderbook_orders["asks"]
-#             ]
-#         }
-#     )
+@router.on_event("startup")
+@repeat_every(seconds=1)
+async def preview_orderbook():
+    orderbook_orders = await order_crud.preview_orderbook()
+    # NOTE: Only provides the last 5 bids and asks orders NOT prices
+    await sio.emit(
+        "orderbook",
+        {
+            "bids": [
+                {
+                    "order_id": order.order_id,
+                    "price": order.order_price,
+                    "quantity": order.order_quantity
+                } for order in orderbook_orders["bids"]
+            ],
+            "asks": [
+                {
+                    "order_id": order.order_id,
+                    "price": order.order_price,
+                    "quantity": order.order_quantity
+                } for order in orderbook_orders["asks"]
+            ]
+        }
+    )
