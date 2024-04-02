@@ -1,5 +1,6 @@
 # Database connection
 from app.core.config import settings
+from sqlalchemy import inspect
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 
@@ -12,4 +13,6 @@ class Base(DeclarativeBase):
 
 async def async_set_db():
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+        tables = await conn.run_sync( lambda sync_conn: inspect(sync_conn).get_table_names())
+        if not len(tables):
+            await conn.run_sync(Base.metadata.create_all)
